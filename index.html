@@ -194,7 +194,7 @@ function agg(key){
   const inR=ok(r.d),g=k=>r.v[R.c[k]]||0;
   if(!inR)continue;for(const k in R.c)T[k]+=g(k);
   if(!/^rec/i.test(r.n)){const p=P[r.n]||(P[r.n]={ur:0,uu:0,ucl:0,it:0});p.ur+=g('ur');p.uu+=g('uu');p.ucl+=g('ucl');p.it+=g('it')}}
- T.pc=R.noCU?T.rc:T.rc+(T.kc||0);T.rm=T.rc-T.ur;T.pcl=T.rcl+T.kcl;T.rml=T.pcl-T.ucl;T.pu=T.ru+T.ku;T.rmu=T.pu-T.uu;T.pct=T.pc>0?Math.min(1,T.ur/T.pc):0;
+ T.pc=R.noCU?T.rc:T.rc+(T.kc||0);T.rm=T.pc-T.ur;T.pcl=T.rcl+T.kcl;T.rml=T.pcl-T.ucl;T.pu=T.ru+T.ku;T.rmu=T.pu-T.uu;T.pct=T.pc>0?Math.min(1,T.ur/T.pc):0;
 
  return{T,people:Object.entries(P).map(([n,v])=>({n,...v,tot:v.ur+v.uu+v.ucl})).filter(p=>p.tot+p.it>0).sort((a,b)=>b.tot-a.tot||b.it-a.it)}}
 function orders(key){
