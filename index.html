@@ -70,6 +70,15 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog input[type=text]{width:100%;ba
 dialog ol{padding-left:18px;color:var(--mut);font-size:13px}dialog li{margin:4px 0}
 @media(max-width:800px){.hero,.two{grid-template-columns:1fr}.row4{grid-template-columns:repeat(2,1fr)}header,.bar,main{padding-left:12px;padding-right:12px}}
 body.tv header .btn.hide{display:none}
+.notes{max-width:1500px;margin:0 auto;padding:0 24px 8px}
+.note .nt{font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:12px;font-weight:600;outline:none;border-bottom:1px dashed transparent}
+.note .nt:focus,.note .nt:hover{border-bottom-color:var(--bd)}
+.note .nb{min-height:140px;outline:none;white-space:pre-wrap;line-height:1.6;word-break:break-word}
+.note .nb:empty:before{content:attr(data-ph);color:var(--mut);opacity:.7}
+.note:focus-within{border-color:var(--a)}
+.credit{text-align:center;padding:26px 16px 34px;color:var(--mut);font-size:12px;letter-spacing:.4px}
+.credit b{display:block;color:var(--tx);font-size:15px;letter-spacing:.8px;margin-bottom:3px}
+@media(max-width:800px){.notes{padding-left:12px;padding-right:12px}}
 </style></head><body>
 <div class="orb o1"></div><div class="orb o2"></div>
 <header>
@@ -81,6 +90,11 @@ body.tv header .btn.hide{display:none}
 </header>
 <div class="bar" id="bar"></div>
 <main id="app"></main>
+<section class="notes"><div class="grid two">
+ <div class="card note"><div class="nt" id="t1" contenteditable="true" spellcheck="false" data-k="note1t" data-d="Notes 1"></div><div class="nb" id="b1" contenteditable="true" data-k="note1b" data-ph="Click here and start typing..."></div></div>
+ <div class="card note"><div class="nt" id="t2" contenteditable="true" spellcheck="false" data-k="note2t" data-d="Notes 2"></div><div class="nb" id="b2" contenteditable="true" data-k="note2b" data-ph="Click here and start typing..."></div></div>
+</div></section>
+<footer class="credit"><b>Prepared By Amr Mohamed</b>Senior Data Analyst &amp; AI Creative</footer>
 
 <dialog id="dlg"><h2 style="color:var(--tx);font-size:18px">Connect your data</h2>
  <ol><li>Upload <b>Database.xlsx</b> to Google Drive → open with Google Sheets (keep the same tab names).</li>
@@ -102,7 +116,7 @@ const REG={
  Local:{sheet:'Local',ord:'local',col:'#ff6b8a',noCU:true,c:{rc:'receviedlocal',ur:'releasedlocalcr',it:'itemlocal'}}
 };
 const DAY=864e5,DATA={},PREV={};
-let S={tab:'Overview',f:{y:new Set(),q:new Set(),m:new Set(),d:new Set()},auto:true,open:'',yrs:[],last:0,mode:'',sig:''},timer,nid=0;
+let S={tab:'Overview',names:new Set(),f:{y:new Set(),q:new Set(),m:new Set(),d:new Set()},auto:true,open:'',yrs:[],last:0,mode:'',sig:''},timer,nid=0;
 const $=id=>document.getElementById(id),dlg=$('dlg');
 const norm=s=>String(s??'').toLowerCase().replace(/[^a-z0-9]/g,'');
 const fmt=n=>Math.round(n).toLocaleString();
@@ -170,11 +184,15 @@ function tv(){document.body.classList.toggle('tv');document.fullscreenElement?do
 const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function ok(d){const t=new Date(d),m=t.getUTCMonth()+1,F=S.f;return(!F.y.size||F.y.has(t.getUTCFullYear()))&&(!F.q.size||F.q.has(Math.ceil(m/3)))&&(!F.m.size||F.m.has(m))&&(!F.d.size||F.d.has(t.getUTCDate()))}
 function setLatest(auto){const t=new Date(S.last);S.auto=!!auto;S.f={y:new Set([t.getUTCFullYear()]),q:new Set(),m:new Set([t.getUTCMonth()+1]),d:new Set([t.getUTCDate()])};render()}
-function clearF(){S.auto=false;S.f={y:new Set(),q:new Set(),m:new Set(),d:new Set()};render()}
+function clearF(){S.auto=false;S.names.clear();S.f={y:new Set(),q:new Set(),m:new Set(),d:new Set()};render()}
 const LB={y:'Year',q:'Quarter',m:'Month',d:'Day'};
 function lbl(k){const x=[...S.f[k]].sort((a,b)=>a-b);if(!x.length)return'All';const n=v=>k==='q'?'Q'+v:k==='m'?MN[v-1]:v;return x.length<=3?x.map(n).join(', '):x.length+' selected'}
 function tog(k,v){S.auto=false;const x=S.f[k];x.has(v)?x.delete(v):x.add(v);$('lb_'+k).textContent=lbl(k);$('auto').classList.remove('on');render(true)}
 function clr(k){S.auto=false;S.f[k].clear();render()}
+function nlbl(){const x=[...S.names];return !x.length?'All':x.length<=2?x.join(', '):x.length+' selected'}
+function togN(el){const n=decodeURIComponent(el.dataset.n);S.names.has(n)?S.names.delete(n):S.names.add(n);render(true)}
+function clrN(){S.names.clear();render(true)}
+function nameSlicer(names){return `<div class="dd ${S.open==='n'?'open':''}" data-k="n" style="margin-bottom:14px;display:inline-block"><button class="dbtn" onclick="openDD('n',event)"><span>Name</span><b>${nlbl()}</b> ▾</button><div class="dp"><button class="clr" onclick="clrN()">Clear</button><div class="dg" style="--c:1">${names.map(n=>`<label class="op"><input type="checkbox" ${S.names.has(n)?'checked':''} data-n="${encodeURIComponent(n)}" onchange="togN(this)">${n}</label>`).join('')}</div></div></div>`}
 function openDD(k,e){e.stopPropagation();S.open=S.open===k?'':k;document.querySelectorAll('.dd').forEach(d=>d.classList.toggle('open',d.dataset.k===S.open))}
 document.addEventListener('click',e=>{if(S.open&&!e.target.closest('.dd')){S.open='';document.querySelectorAll('.dd').forEach(d=>d.classList.remove('open'))}});
 function theme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem('crs_theme',t)}catch(e){}$('tbtn').textContent=t==='dark'?'☀️':'🌙'}
@@ -227,11 +245,18 @@ function render(keep){
   <div class="grid kpis">${kpi('CRS',T.rc,T.pc,T.ur,T.rm)}${R.noCU?'':kpi('Clarification',T.rcl,T.pcl,T.ucl,T.rml)+kpi('Update',T.ru,T.pu,T.uu,T.rmu)}
   <div class="card"><h2>Items</h2><div class="k"><div class="v" style="font-size:44px">${N(T.it)}</div><div class="l">Items processed</div></div></div></div></div>
   <div class="card"><h2>Orders Pipeline</h2><div class="pipe">${od.map(([l,v])=>`<div class="step"><div class="v">${N(v)}</div><div class="l">${l}</div></div>`).join('')}</div></div>
-  <div class="card"><h2>Performance by Team Member</h2>${chart(people,R)}</div></div>`}
+  <div class="card"><h2>Performance by Team Member</h2>${nameSlicer(people.map(p=>p.n).sort((a,b)=>a.localeCompare(b)))}${chart(S.names.size?people.filter(p=>S.names.has(p.n)):people,R)}</div></div>`}
  $('app').innerHTML=h;
  document.querySelectorAll('.n').forEach(el=>{const id=el.dataset.id,to=+el.dataset.v,from=PREV[id]??0;PREV[id]=to;const t0=performance.now();
   (function step(t){const p=Math.min(1,(t-t0)/900);el.textContent=fmt(from+(to-from)*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)})(t0)})}
 
 let _t;try{_t=localStorage.getItem('crs_theme')}catch(e){}theme(_t||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'));
+/* ===== Editable note cards (saved in this browser) ===== */
+document.querySelectorAll('.note [contenteditable]').forEach(el=>{
+ let v=null;try{v=localStorage.getItem('crs_'+el.dataset.k)}catch(e){}
+ if(v!==null)el.textContent=v;else if(el.dataset.d)el.textContent=el.dataset.d;
+ el.addEventListener('input',()=>{try{localStorage.setItem('crs_'+el.dataset.k,el.innerText.replace(/\n$/,''))}catch(e){}});
+ el.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,(e.clipboardData||window.clipboardData).getData('text'))});
+});
 start();
 </script></body></html>
